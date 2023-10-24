@@ -71,8 +71,8 @@ xs = xs.reshape((Nx,1))
 
 break_limit = 1*dx
 
-def time_avg(F , T):
-    F_avg = np.convolve(F.reshape(len(F),),np.ones((T,)))
+def time_avg(F , T , dt=dt):
+    F_avg = np.convolve(F.reshape(len(F),),np.ones((int(T/dt),)))
     return F_avg[:len(F)]
 
 def find_nearest(array, value):
@@ -80,9 +80,9 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
-# v_bnd = np.zeros((len(KK_series),len(Vaf_series),Nt))
-# phi_bnd = np.zeros((len(KK_series),len(Vaf_series),Nt))
-# max_ratio = np.zeros((len(KK_series),len(Vaf_series),Nt))
+v_bnd = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series),Nt))
+phi_bnd = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series),Nt))
+max_ratio = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series),Nt))
 
 # KE = np.zeros((Nt,Nx))
 # PE = np.zeros((Nt,Nx-1))
