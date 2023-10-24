@@ -9,7 +9,7 @@
 """
 
 parent_folder  = '/Users/shaish/Library/CloudStorage/Dropbox/Science'
-parent_folder += '/Projects/EnergyExtraction/codes_results_resub/GitHub_NX_codes/NX_results'
+parent_folder += '/Projects/EnergyExtraction/codes_results_resub/GitHub_NX_codes/NX_results/KK1'
 
 v2phi_name = 'v2phi_K11'
 
@@ -37,14 +37,14 @@ pltshow = True
 os.chdir(parent_folder)
 
 KK_series  = [1]
-Vaf_series = [1]#np.around(np.linspace(5.5,10.,10),3)
-a1_series  = [3]#np.around(np.linspace(2,5,13),3)
-g0_series  = [.1]#np.around(np.linspace(.1,.3,9),3)
+Vaf_series = np.around(np.linspace(1.5,5.,8),3)
+a1_series  = np.around(np.linspace(2,5,13),3)
+g0_series  = np.around(np.linspace(.125,.275,4),3)
 v2phi_ratio = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series)))
 
 NUMRUNS    = np.prod(v2phi_ratio.shape)
 
-Ttot, dt = 10 , .0001
+Ttot, dt = 5 , .0001
 Nt = int(Ttot/dt - 1)
 tseries = np.linspace(0,Ttot,Nt)
 
@@ -69,6 +69,11 @@ xs = xmax/2 + np.arange(-xmax/2,xmax/2,dx)
 Nx = len(xs)
 xs = xs.reshape((Nx,1))
 
+inc0 = np.zeros((Nx-1 , Nx))
+for ii in range(Nx-1):
+    inc0[ii,ii] = 1
+    inc0[ii,ii+1] = -1
+
 break_limit = 1*dx
 
 def time_avg(F , T , dt=dt):
@@ -80,21 +85,14 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
-v_bnd = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series),Nt))
-phi_bnd = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series),Nt))
-v2phi_ratio = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series),Nt))
-
 total_cnt = 0
 
 k_ind = 0
 for KK in KK_series:
-
     g_ind = 0
     for g0 in g0_series:
-    
         a_ind = 0
         for a1 in a1_series:
-
             v_ind = 0
             for Vaf in Vaf_series:
 
@@ -128,11 +126,6 @@ for KK in KK_series:
 
                 phi_x = phi_i * np.ones((Nx,1))
                 u_field = .0*deepcopy(xs)
-
-                inc0 = np.zeros((Nx-1 , Nx))
-                for ii in range(Nx-1):
-                    inc0[ii,ii] = 1
-                    inc0[ii,ii+1] = -1
 
                 v_field = np.zeros((Nx,1))
                 Xfield  = xs + u_field
@@ -228,7 +221,7 @@ for KK in KK_series:
                                     facecolor='w',edgecolor='w',linewidth=5)
                     plt.plot(tseries,v_bnd/phi_bnd,linewidth=5,solid_capstyle='round')
                     plt.xlabel(r'Time',fontsize=30)
-                    plt.ylabel(r'$\phi_b/v_b$',fontsize=30,fontname='Times',\
+                    plt.ylabel(r'$v_b/\phi_b$',fontsize=30,fontname='Times',\
                                 fontweight = 'bold')
                     plt.xticks(fontsize=20) ; plt.yticks(fontsize=20)
                     if saveimg:
@@ -295,32 +288,23 @@ t_finish = time()
 # import beepy
 # beepy.beep(sound='ping')
 
-np.save(v2phi_name,v2phi_ratio)
+#%%
 
 v2phi_kk = deepcopy(v2phi_ratio[0,:,:,:])
+np.save(v2phi_name,v2phi_ratio)
 
 #%%
 
-Veven = np.load('Veff_table_KK1_highres.npy')
-Vodd = np.load('Veff_table_K11_highres_Vel_odd.npy')
-Vmac = np.load('Veff_table_K11_macro_range.npy')
+v2phi = deepcopy(v2phi_kk)
 
-vall = np.empty((1, 9, 13, 20), dtype=Veven.dtype)
+for jj in range(len(g0_series)):
+    vg = v2phi[jj,:,:]
+    lim_g0 = g0_series[jj]/Gamma0
+    vg[vg > lim_g0] = 0
+    v2phi[jj,:,:] = vg
 
-vall[0,:,:,0:10:2] = Vodd[0,:,:,:]
-vall[0,:,:,1:10:2] = Veven[0,:,:,:]
-vall[0,:,:,10:] = Vmac[0,:,:,:]
-
-vall2 = deepcopy(vall[0,:,:,:])
-
-#%%
-
-# vall2 = deepcopy(Veff_copy)
-
-vall2 = np.load('V_all.npy')
-
-bool_veff = np.ones(vall2.shape)
-bool_veff[vall2 == 0] = 0
+bool_veff = np.ones(v2phi.shape)
+bool_veff[v2phi == 0] = 0
 
 bool_veff = np.swapaxes(bool_veff,0,1)
 
@@ -338,19 +322,20 @@ edgecolors = np.where(n_voxels, '#BFAB6E', '#FDF4A6')
 fcolors_2 = explode(facecolors)
 ecolors_2 = explode(edgecolors)
 
-x, y, z = np.indices(np.array(bool_veff.shape)+1)#.astype(float) // 2
+x, y, z = np.indices(np.array(bool_veff.shape)+1)
 
 ax = plt.figure().add_subplot(projection='3d')
 ax.voxels(x, y, z, bool_veff,alpha=1, facecolors=fcolors_2, edgecolors=ecolors_2)
 ax.set_aspect('equal')
 
 
-plt.savefig('alpha_g_Vaf_largeV.png')
-plt.savefig('alpha_g_Vaf_largeV.pdf')
+plt.savefig('v2phi_gamma1.png')
+plt.savefig('v2phi_gamma1.pdf')
 plt.show()
 
 #%%
-Vtable = v2phi_ratio[0,:,:,-1]
+
+Vtable = v2phi
 fig = plt.figure(figsize=(10,7),dpi=100)
 plt.imshow(np.flipud(Vtable),interpolation='bicubic',cmap=mpl.colormaps['bone'])
 ax = plt.gca()
@@ -362,26 +347,33 @@ plt.xlabel(r'$\tau_K$',fontsize=30)
 
 #%%
 
-veff = vall2/np.max(vall2)
+veff = v2phi/np.max(v2phi)
 veff = np.swapaxes(veff,0,1)
 
-#%%
-veff = vall2
+veff = v2phi
+
 ax_num = 0
 for aa in range(veff.shape[ax_num]):
     plt.imshow(np.flipud(veff[aa,:,:]),interpolation='bicubic',cmap=mpl.colormaps['bone'],extent=[np.min(a1_series),np.max(a1_series),np.min(Vaf_series),np.max(Vaf_series)])
     plt.show()
-
-#%%
 
 ax_num = 1
 for aa in range(veff.shape[ax_num]):
     plt.imshow(np.flipud(veff[:,aa,:]),interpolation='bicubic',cmap=mpl.colormaps['bone'],extent=[np.min(g0_series),np.max(g0_series),np.min(Vaf_series),np.max(Vaf_series)])
     plt.show()
 
-#%%
-
 ax_num = 2
 for aa in range(veff.shape[ax_num]):
     plt.imshow(np.flipud(veff[:,:,aa]),interpolation='bicubic',cmap=mpl.colormaps['bone'],extent=[np.min(g0_series),np.max(g0_series),np.min(a1_series),np.max(a1_series)])
     plt.show()
+
+
+#%%
+
+fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+
+# surf = ax.plot_surface(gg, alpha, Vaf, cmap=cm.viridis,
+                    #    linewidth=0,alpha=1)#, antialiased=False)
+
+ax.view_init(elev=30, azim=250)
+ax.set_box_aspect((2,1,1))
