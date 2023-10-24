@@ -30,8 +30,8 @@ mpl.rc('font', **{'family': 'serif'})
 
 t_start = time()
 
-saveimg = True
-savedat = True
+saveimg = False
+savedat = False
 pltshow = True
 
 os.chdir(parent_folder)
@@ -42,19 +42,11 @@ a1_series  = np.around(np.linspace(2,5,13),3)
 g0_series  = np.around(np.linspace(.1,.3,9),3)
 Veff_table = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series)))
 
-# KK_series  = [1]
-# Vaf_series = np.around(np.linspace(.1,1.0,10),3)
-# a1_series  = np.around(np.linspace(2,10,17),3)
-# g0_series  = np.around(np.linspace(.1,1,2),3)
-# Veff_table = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series)))
-
 NUMRUNS    = np.prod(Veff_table.shape)
 
 Ttot, dt = 10 , .0001
 Nt = int(Ttot/dt - 1)
 tseries = np.linspace(0,Ttot,Nt)
-
-T_avg = int(Ttot/dt/2)
 
 n_plot = np.min((10,Nt))
 tplot = np.arange(Nt)[::int(Nt/n_plot)]
@@ -68,8 +60,6 @@ eta = 1
 a2 = 1
 ########### Particle Parameters ###########
 Gamma0 = 1
-
-total_cnt = 0
 
 xmax = np.max(Vaf_series) * Ttot
 x_res = 100
@@ -100,6 +90,8 @@ def find_nearest(array, value):
 # dU = np.zeros((Nt,Nx))
 # dQ = np.zeros((Nt,Nx))
 
+total_cnt = 0
+
 k_ind = 0
 for KK in KK_series:
 
@@ -125,7 +117,7 @@ for KK in KK_series:
                         f.write('g0 = '     + str(g0) + '\n')
                         f.write('alpha = '  + str(a1) + '\n')
                         f.write('Vaf = '    + str(Vaf) + '\n')
-                        f.write('eta = '  + str(eta) + '\n')
+                        f.write('eta = '    + str(eta) + '\n')
                         f.write('Gamma0 = ' + str(Gamma0) + '\n')
                         f.write('---------------------------------------------------------------' + '\n')
                         f.write('---------------------------------------------------------------' + '\n')
@@ -292,9 +284,9 @@ for KK in KK_series:
                             fontweight = 'bold')
                     plt.xticks(fontsize=20) ; plt.yticks(fontsize=20)
                     if saveimg:
-                        imgname =   r'Vaf%r.'%round(Vaf,3) + r'_a1%r'%round(a1,3)\
-                                + r'_eta%r'%round(eta,3) + r'_kappa%r'%round(KK,3)\
-                                + r'_g%r'%round(g0,3)
+                        imgname =  r'Vaf%r.'%round(Vaf,3) + r'_a1%r'%round(a1,3)\
+                                 + r'_eta%r'%round(eta,3) + r'_kappa%r'%round(KK,3)\
+                                 + r'_g%r'%round(g0,3)
                         plt.savefig(imgname + '.png')
                         plt.savefig(imgname + '.pdf')
                     plt.show()
@@ -303,10 +295,10 @@ for KK in KK_series:
                 Xp[-1] = Xp[-2]
                 Veff_table[k_ind , g_ind , a_ind , v_ind] = Veff[tt+1][0]
 
-                # v_bnd[k_ind,v_ind,-1] = v_bnd[k_ind,v_ind,-2]
-                # phi_bnd[k_ind,v_ind,-1] = phi_bnd[k_ind,v_ind,-2]
-                # v_phi_bnd = v_bnd/phi_bnd
-                # max_ratio[k_ind,v_ind] = np.max(v_phi_bnd,axis=2)[0][0]
+                v_bnd[k_ind,g_ind,a_ind,v_ind , -1] = v_bnd[k_ind,v_ind,-2]
+                phi_bnd[k_ind,g_ind,a_ind,v_ind , -1] = phi_bnd[k_ind,v_ind,-2]
+                v_phi_bnd = v_bnd/phi_bnd
+                max_ratio[k_ind,g_ind,a_ind,v_ind] = np.max(v_phi_bnd,axis=2)[0][0]
 
                 v_ind += 1
 
@@ -437,19 +429,19 @@ veff = np.swapaxes(veff,0,1)
 veff = vall2
 ax_num = 0
 for aa in range(veff.shape[ax_num]):
-    plt.imshow(np.flipud(veff[aa,:,:]),interpolation='bicubic',cmap=mpl.colormaps['bone'])
+    plt.imshow(np.flipud(veff[aa,:,:]),interpolation='bicubic',cmap=mpl.colormaps['bone'],extent=[np.min(a1_series),np.max(a1_series),np.min(Vaf_series),np.max(Vaf_series)])
     plt.show()
 
 #%%
 
 ax_num = 1
 for aa in range(veff.shape[ax_num]):
-    plt.imshow(np.flipud(veff[:,aa,:]),interpolation='bicubic',cmap=mpl.colormaps['bone'])
+    plt.imshow(np.flipud(veff[:,aa,:]),interpolation='bicubic',cmap=mpl.colormaps['bone'],extent=[np.min(g0_series),np.max(g0_series),np.min(Vaf_series),np.max(Vaf_series)])
     plt.show()
 
 #%%
 
 ax_num = 2
 for aa in range(veff.shape[ax_num]):
-    plt.imshow(np.flipud(veff[:,:,aa]),interpolation='bicubic',cmap=mpl.colormaps['bone'])
+    plt.imshow(np.flipud(veff[:,:,aa]),interpolation='bicubic',cmap=mpl.colormaps['bone'],extent=[np.min(g0_series),np.max(g0_series),np.min(a1_series),np.max(a1_series)])
     plt.show()
