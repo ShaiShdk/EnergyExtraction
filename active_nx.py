@@ -9,7 +9,7 @@
 """
 
 parent_folder  = '/Users/shaish/Library/CloudStorage/Dropbox/Science'
-parent_folder += '/Projects/EnergyExtraction/codes_results_resub/GitHub_NX_codes/NX_results/KK1_GG0_highRes'
+parent_folder += '/Projects/EnergyExtraction/codes_results_resub/GitHub_NX_codes/NX_results/KK0_GG0_highRes'
 
 v2phi_name = 'v2phi_KK1_GG1'
 v_bnd_name = 'v_bnd_KK1_GG1'
@@ -306,6 +306,17 @@ if savedat:
     np.save(v_bnd_name,v_bnd_infty)
     np.save(phi_bnd_name,phi_bnd_infty)
 
+#%%
+
+Vmap = deepcopy(v_bnd_infty[0,0,...]/phi_bnd_infty[0,0,...])
+# Vmap = np.flipud(v2phi_kk[0,:,:])
+Vmap = np.flipud(Vmap)
+plt.imshow(Vmap,interpolation='bicubic',cmap=mpl.colormaps['bone'])
+plt.colorbar()
+plt.contour(Vmap,levels=np.arange(0,np.max(Vmap),.05),colors=[(0,.5,.5)])
+
+plt.savefig('v2phi_bnd_GG1_heatmap.png')
+plt.savefig('v2phi_bnd_GG1_heatmap.pdf')
 
 #%%
 
