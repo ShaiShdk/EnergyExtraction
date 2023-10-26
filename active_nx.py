@@ -9,9 +9,11 @@
 """
 
 parent_folder  = '/Users/shaish/Library/CloudStorage/Dropbox/Science'
-parent_folder += '/Projects/EnergyExtraction/codes_results_resub/GitHub_NX_codes/NX_results/KK1'
+parent_folder += '/Projects/EnergyExtraction/codes_results_resub/GitHub_NX_codes/NX_results/KK1_GG0_highRes'
 
-v2phi_name = 'v2phi_K11'
+v2phi_name = 'v2phi_KK1_GG1'
+v_bnd_name = 'v_bnd_KK1_GG1'
+phi_bnd_name = 'phi_bnd_KK1_GG1'
 
 from copy import deepcopy
 import os
@@ -37,10 +39,18 @@ pltshow = True
 os.chdir(parent_folder)
 
 KK_series  = [1]
-Vaf_series = np.around(np.linspace(1.5,5.,8),3)
-a1_series  = np.around(np.linspace(2,5,13),3)
-g0_series  = np.around(np.linspace(.125,.275,4),3)
+Vaf_series = np.around(np.linspace(1.,10,37),3)
+a1_series  = np.around(np.linspace(1.5,10,35),3)
+g0_series  = [None]#np.around(np.linspace(.1,.3,9),3)
+
+np.save('KK_series',KK_series)
+np.save('g0_series',g0_series)
+np.save('a1_series',a1_series)
+np.save('Vaf_series',Vaf_series)
+
 v2phi_ratio = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series)))
+v_bnd_infty = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series)))
+phi_bnd_infty = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series)))
 
 NUMRUNS    = np.prod(v2phi_ratio.shape)
 
@@ -74,8 +84,6 @@ for ii in range(Nx-1):
     inc0[ii,ii] = 1
     inc0[ii,ii+1] = -1
 
-break_limit = 1*dx
-
 def time_avg(F , T , dt=dt):
     F_avg = (dt/T) * np.convolve(F.reshape(len(F),),np.ones((int(T/dt),)))
     return F_avg[:len(F)]
@@ -97,7 +105,7 @@ for KK in KK_series:
             for Vaf in Vaf_series:
 
                 if (savedat and saveimg):    
-                    saveFolder = parent_folder + f'/{KK:.3f}_{g0:.3f}_{a1:.3f}_{Vaf:.3f}'
+                    saveFolder = parent_folder + f'/{KK:.3f}_g0{g0}_{a1:.3f}_{Vaf:.3f}'
                     if not(os.path.exists(saveFolder)):
                         os.mkdir(saveFolder)
                     os.chdir(saveFolder)
@@ -106,7 +114,7 @@ for KK in KK_series:
                     with open('a1_Vaf_metadata.txt','a') as f:
                         f.write('-------------------------- PARAMETERS -------------------------' + '\n')
                         f.write('---------------------------------------------------------------' + '\n')
-                        f.write('g0 = '     + str(g0) + '\n')
+                        f.write('g0 = '     + 'None' + '\n')
                         f.write('alpha = '  + str(a1) + '\n')
                         f.write('Vaf = '    + str(Vaf) + '\n')
                         f.write('eta = '    + str(eta) + '\n')
@@ -204,17 +212,20 @@ for KK in KK_series:
                     if saveimg:
                         imgname =  r'Vaf%r.'%round(Vaf,3) + r'_a1%r'%round(a1,3)\
                                  + r'_eta%r'%round(eta,3) + r'_kappa%r'%round(KK,3)\
-                                 + r'_g%r'%round(g0,3)
+                                 + r'_g0None'
                         plt.savefig(imgname + '.png')
                         plt.savefig(imgname + '.pdf')
                     plt.show()
 
-                v_bnd = time_avg(v_bnd,eta/KK,dt)
-                phi_bnd = time_avg(phi_bnd,eta/KK,dt)
+                v_bnd = time_avg(v_bnd,eta/(a2*phi_i**2),dt)
+                phi_bnd = time_avg(phi_bnd,eta/(a2*phi_i**2),dt)
 
                 v_bnd[-1] = v_bnd[-2]
                 phi_bnd[-1] = phi_bnd[-2]
                 v2phi_ratio[k_ind,g_ind,a_ind,v_ind] = np.max(v_bnd/phi_bnd , axis=0)
+
+                v_bnd_infty[k_ind,g_ind,a_ind,v_ind] = v_bnd[-1]
+                phi_bnd_infty[k_ind,g_ind,a_ind,v_ind] = phi_bnd[-1]
 
                 if pltshow:
                     fig = plt.figure(figsize=(10,5),dpi=100,\
@@ -227,7 +238,7 @@ for KK in KK_series:
                     if saveimg:
                         imgname = r'v2phi' +  r'Vaf%r.'%round(Vaf,3) + r'_a1%r'%round(a1,3)\
                                  + r'_eta%r'%round(eta,3) + r'_kappa%r'%round(KK,3)\
-                                 + r'_g%r'%round(g0,3)
+                                 + r'_g0None'
                         plt.savefig(imgname + '.png')
                         plt.savefig(imgname + '.pdf')
                     plt.show()
@@ -238,7 +249,7 @@ for KK in KK_series:
 
                 print('a1 =',a1,'; a2 =',a2,'; Vaf =',Vaf)
                 print('eta =',eta,'; Kappa =',KK,'; gamma =',GG)
-                print('Gamma =',Gamma0,'; g0 =',g0)
+                print('Gamma =',Gamma0, '; g0 = ' , ' None')
                 print('Phi_bnd =',np.around(phi_bnd[-1],2))
                 print('V_bnd/Vaf =',np.around(v_bnd[-1]/Vaf/Ttot,2))
                 print('RunTime =',int(tfinish - tinit),'sec')
@@ -261,11 +272,11 @@ for KK in KK_series:
                 if (savedat and saveimg):
                     os.chdir(saveFolder)                        
                     with open('a1_Vaf_phase_diagram.txt','a') as f:
-                        f.write( str(g0) + '  ; ' + str(a1) + '  ; ' + str(Vaf) \
+                        f.write( 'None' + '  ; ' + str(a1) + '  ; ' + str(Vaf) \
                                 + '  ; ' + str(round(v_bnd[-1],3)) + '  ; ' + str(round(phi_bnd[-1],3)) + '\n' + '\n')
                     f.close()    
                     with open('a1_Vaf_metadata.txt','a') as f:
-                        f.write('g0 = ' + str(g0) + ' ; a1 = ' + str(a1) + ' ; Vaf = ' + str(Vaf) + '\n')
+                        f.write('g0 = ' 'None' + ' ; a1 = ' + str(a1) + ' ; Vaf = ' + str(Vaf) + '\n')
                         f.write('----------------------------------' + '\n')
                         f.write('Phi_bnd = ' + str(np.around(phi_bnd[-1],2)) + '\n')
                         f.write('V_bnd/Vaf = ' + str(np.around(v_bnd[-1]/Vaf/Ttot,2)) + '\n')
@@ -288,14 +299,37 @@ t_finish = time()
 # import beepy
 # beepy.beep(sound='ping')
 
+v2phi_kk = deepcopy(v2phi_ratio[0,...])
+
+if savedat:
+    np.save(v2phi_name,v2phi_ratio)
+    np.save(v_bnd_name,v_bnd_infty)
+    np.save(phi_bnd_name,phi_bnd_infty)
+
+
 #%%
 
-v2phi_kk = deepcopy(v2phi_ratio[0,:,:,:])
-np.save(v2phi_name,v2phi_ratio)
+
+g0_series = np.around(np.linspace(0,.5,26),3)
+v2phi = np.zeros((len(g0_series),len(a1_series),len(Vaf_series)))
+for jj in range(len(g0_series)):
+    v2phi[jj,...] = v2phi_kk[0,...]
+
+for jj in range(len(g0_series)):
+    vg = v2phi[jj,:,:]
+    lim_g0 = g0_series[jj]/Gamma0
+    vg[vg > lim_g0] = 0
+    v2phi[jj,:,:] = vg
+
+
+# v2phi_kk = deepcopy(v2phi_ratio[0,...])
+# np.save(v2phi_name,v2phi_ratio)
+
+# v2phi = deepcopy(v2phi_kk)
 
 #%%
 
-v2phi = deepcopy(v2phi_kk)
+# v2phi = deepcopy(v2phi_kk)
 
 for jj in range(len(g0_series)):
     vg = v2phi[jj,:,:]
@@ -327,7 +361,6 @@ x, y, z = np.indices(np.array(bool_veff.shape)+1)
 ax = plt.figure().add_subplot(projection='3d')
 ax.voxels(x, y, z, bool_veff,alpha=1, facecolors=fcolors_2, edgecolors=ecolors_2)
 ax.set_aspect('equal')
-
 
 plt.savefig('v2phi_gamma1.png')
 plt.savefig('v2phi_gamma1.pdf')
