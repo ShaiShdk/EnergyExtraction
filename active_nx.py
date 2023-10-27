@@ -9,11 +9,7 @@
 """
 
 parent_folder  = '/Users/shaish/Library/CloudStorage/Dropbox/Science'
-parent_folder += '/Projects/EnergyExtraction/codes_results_resub/GitHub_NX_codes/NX_results/KK0_GG0_highRes'
-
-v2phi_name = 'v2phi_KK1_GG1'
-v_bnd_name = 'v_bnd_KK1_GG1'
-phi_bnd_name = 'phi_bnd_KK1_GG1'
+parent_folder += '/Projects/EnergyExtraction/codes_results_resub/GitHub_NX_codes/NX_results'
 
 from copy import deepcopy
 import os
@@ -36,9 +32,16 @@ saveimg = True
 savedat = True
 pltshow = True
 
+KK , GG = 1 , 1
+
+parent_folder += f'/KK{KK}_GG{GG}_highRes'
+v2phi_name = f'v2phi_KK{KK}_GG{GG}'
+v_bnd_name = f'v_bnd_KK{KK}_GG{GG}'
+phi_bnd_name = f'phi_bnd_KK{KK}_GG{GG}'
+
 os.chdir(parent_folder)
 
-KK_series  = [1]
+KK_series  = [KK]
 Vaf_series = np.around(np.linspace(1.,10,37),3)
 a1_series  = np.around(np.linspace(1.5,10,35),3)
 g0_series  = [None]#np.around(np.linspace(.1,.3,9),3)
@@ -65,7 +68,7 @@ if not(pltshow):
 
 ############# Field Parameters ############
 phi_i = 1
-GG = 0
+# GG = 0
 eta = 1
 a2 = 1
 ########### Particle Parameters ###########
@@ -308,116 +311,129 @@ if savedat:
 
 #%%
 
+import scipy.ndimage
+from scipy.ndimage.filters import gaussian_filter
+
 Vmap = deepcopy(v_bnd_infty[0,0,...]/phi_bnd_infty[0,0,...])
-# Vmap = np.flipud(v2phi_kk[0,:,:])
 Vmap = np.flipud(Vmap)
-plt.imshow(Vmap,interpolation='bicubic',cmap=mpl.colormaps['bone'])
+
+# vInf = deepcopy(v_bnd_infty[0,0,...])
+# vInf = np.flipud(vInf)
+
+gauss_sigma = 10
+Vmap = gaussian_filter(Vmap, gauss_sigma)
+
+# Vmap = scipy.ndimage.zoom(Vmap, 10)
+
+plt.imshow(Vmap,interpolation='bicubic',cmap=mpl.colormaps['YlGnBu']\
+           ,extent=[np.min(a1_series),np.max(a1_series),np.min(Vaf_series),np.max(Vaf_series)])
 plt.colorbar()
-plt.contour(Vmap,levels=np.arange(0,np.max(Vmap),.05),colors=[(0,.5,.5)])
+plt.contour(np.flipud(Vmap),levels=np.arange(0,np.max(Vmap),.05),colors=[(0,.5,.7)]\
+            ,extent=[np.min(a1_series),np.max(a1_series),np.min(Vaf_series),np.max(Vaf_series)])
 
-plt.savefig('v2phi_bnd_GG1_heatmap.png')
-plt.savefig('v2phi_bnd_GG1_heatmap.pdf')
-
-#%%
-
-
-g0_series = np.around(np.linspace(0,.5,26),3)
-v2phi = np.zeros((len(g0_series),len(a1_series),len(Vaf_series)))
-for jj in range(len(g0_series)):
-    v2phi[jj,...] = v2phi_kk[0,...]
-
-for jj in range(len(g0_series)):
-    vg = v2phi[jj,:,:]
-    lim_g0 = g0_series[jj]/Gamma0
-    vg[vg > lim_g0] = 0
-    v2phi[jj,:,:] = vg
-
-
-# v2phi_kk = deepcopy(v2phi_ratio[0,...])
-# np.save(v2phi_name,v2phi_ratio)
-
-# v2phi = deepcopy(v2phi_kk)
+# plt.savefig(f'v2phi_bnd_KK{KK}_GG{GG}_heatmap.png')
+# plt.savefig(f'v2phi_bnd_KK{KK}_GG{GG}_heatmap.pdf')
 
 #%%
 
-# v2phi = deepcopy(v2phi_kk)
+Gamma0 = 1
+g0_series = np.around(np.linspace(0,.25,51),3)
+
+Vmap = deepcopy(v_bnd_infty[0,0,...]/phi_bnd_infty[0,0,...])
+# Vmap = np.fliplr(Vmap)
+Vmap = np.flipud(Vmap)
+
+gauss_sigma = 2
+Vmap = gaussian_filter(Vmap, gauss_sigma)
+
+v2b = np.zeros((len(g0_series),len(a1_series),len(Vaf_series)))
 
 for jj in range(len(g0_series)):
-    vg = v2phi[jj,:,:]
+    v2b[jj,...] = Vmap
+
+for jj in range(len(g0_series)):
+    vg = v2b[jj,:,:]
     lim_g0 = g0_series[jj]/Gamma0
     vg[vg > lim_g0] = 0
-    v2phi[jj,:,:] = vg
+    v2b[jj,:,:] = vg.astype(bool)
 
-bool_veff = np.ones(v2phi.shape)
-bool_veff[v2phi == 0] = 0
+# v2b = np.swapaxes(v2b,1,2)
+# X,Y,Z = np.meshgrid(g0_series,Vaf_series,a1_series)
 
-bool_veff = np.swapaxes(bool_veff,0,1)
+X,Y,Z = np.meshgrid(g0_series,a1_series,Vaf_series)
 
-def explode(data):
-    size = np.array(data.shape)
-    data_e = np.zeros(size - 1, dtype=data.dtype)
-    # data_e[::2, ::2, ::2] = data
-    data_e = data
-    return data_e
+data = np.swapaxes(v2b , 0 , 1)
 
-n_voxels = np.zeros(bool_veff.shape, dtype=bool)
-facecolors = np.where(n_voxels, '#FFD65DC0', '#1A88CCC0')
-edgecolors = np.where(n_voxels, '#BFAB6E', '#FDF4A6')
+kw = {
+    'vmin': data.min(),
+    'vmax': data.max(),
+    'levels': np.around(np.linspace(data.min(), data.max(), 20), 2),    
+    'cmap': mpl.colormaps['YlGnBu']
+}
 
-fcolors_2 = explode(facecolors)
-ecolors_2 = explode(edgecolors)
+# Create a figure with 3D ax
+fig = plt.figure(figsize=(5, 4))
+ax = fig.add_subplot(111, projection='3d')
 
-x, y, z = np.indices(np.array(bool_veff.shape)+1)
+# Plot contour back surfaces
+_ = ax.contourf(
+    X[:, :, 0], Y[:, :, 0], data[:, :, 0],
+    zdir='z', offset=Z.min(), alpha=.5, **kw
+)
+_ = ax.contourf(
+    X[0, :, :], data[0, :, :], Z[0, :, :],
+    zdir='y', offset=Y.min(), alpha=.5, **kw
+)
+C = ax.contourf(
+    data[:, -1, :], Y[:, -1, :], Z[:, -1, :],
+    zdir='x', offset=X.max(), alpha=.5, **kw
+)
 
-ax = plt.figure().add_subplot(projection='3d')
-ax.voxels(x, y, z, bool_veff,alpha=1, facecolors=fcolors_2, edgecolors=ecolors_2)
-ax.set_aspect('equal')
+# Plot contour front surfaces
+_ = ax.contourf(
+    X[:, :, -1], Y[:, :, -1], data[:, :, -1],
+    zdir='z', offset=Z.max(), alpha=.5, **kw
+)
+_ = ax.contourf(
+    X[-1, :, :], data[-1, :, :], Z[-1, :, :],
+    zdir='y', offset=Y.max(), alpha=.5, **kw
+)
+C = ax.contourf(
+    data[:, 0, :], Y[:, 0, :], Z[:, 0, :],
+    zdir='x', offset=X.min(), alpha=.5, **kw
+)
+# --
 
-plt.savefig('v2phi_gamma1.png')
-plt.savefig('v2phi_gamma1.pdf')
+# Set limits of the plot from coord limits
+xmin, xmax = X.min(), X.max()
+ymin, ymax = Y.min(), Y.max()
+zmin, zmax = Z.min(), Z.max()
+ax.set(xlim=[xmin, xmax], ylim=[ymin, ymax], zlim=[zmin, zmax])
+
+edges_kw = dict(color=[.1,.3,.6], linewidth=.5, zorder=1e3)
+ax.plot([xmax, xmax], [ymin, ymax], [zmin, zmin], **edges_kw)
+ax.plot([xmin, xmax], [ymin, ymin], [zmin, zmin], **edges_kw)
+ax.plot([xmax, xmax], [ymin, ymin], [zmin, zmax], **edges_kw)
+ax.plot([xmax, xmin], [ymin, ymin], [zmax, zmax], **edges_kw)
+ax.plot([xmin, xmin], [ymin, ymax], [zmax, zmax], **edges_kw)
+ax.plot([xmin, xmin], [ymin, ymin], [zmax, zmin], **edges_kw)
+ax.plot([xmin, xmax], [ymax, ymax], [zmin, zmin], **edges_kw)
+ax.plot([xmax, xmax], [ymin, ymax], [zmax, zmax], **edges_kw)
+ax.plot([xmin, xmin], [ymin, ymax], [zmin, zmin], **edges_kw)
+ax.plot([xmax, xmax], [ymax, ymax], [zmin, zmax], **edges_kw)
+ax.plot([xmin, xmax], [ymax, ymax], [zmax, zmax], **edges_kw)
+ax.plot([xmin, xmin], [ymax, ymax], [zmin, zmax], **edges_kw)
+
+# ax.view_init(elev=30, azim=220, roll=0)
+ax.view_init(elev=30, azim=135, roll=0)
+# ax.set_title(f'$\kappa =$ {KK} ; $\gamma =$ {GG}')
+ax.set_box_aspect([1.5,2,2], zoom=0.9)
+# ax.set_xlabel('$g_0$')
+# ax.set_ylabel('$\alpha_1$')
+
+fig.colorbar(C, ax=ax, fraction=0.02, pad=0.1, label='$V_{p}$')
+
+# plt.savefig(f'v2phi_bnd_KK{KK}_GG{GG}_contour.png')
+# plt.savefig(f'v2phi_bnd_KK{KK}_GG{GG}_contour.pdf')
 plt.show()
 
-#%%
-
-Vtable = v2phi
-fig = plt.figure(figsize=(10,7),dpi=100)
-plt.imshow(np.flipud(Vtable),interpolation='bicubic',cmap=mpl.colormaps['bone'])
-ax = plt.gca()
-ax.set_autoscale_on(True)
-plt.xticks(fontsize=15)
-plt.yticks(fontsize=15)
-plt.ylabel(r'$\alpha_1$',fontsize=30)
-plt.xlabel(r'$\tau_K$',fontsize=30)
-
-#%%
-
-veff = v2phi/np.max(v2phi)
-veff = np.swapaxes(veff,0,1)
-
-veff = v2phi
-
-ax_num = 0
-for aa in range(veff.shape[ax_num]):
-    plt.imshow(np.flipud(veff[aa,:,:]),interpolation='bicubic',cmap=mpl.colormaps['bone'],extent=[np.min(a1_series),np.max(a1_series),np.min(Vaf_series),np.max(Vaf_series)])
-    plt.show()
-
-ax_num = 1
-for aa in range(veff.shape[ax_num]):
-    plt.imshow(np.flipud(veff[:,aa,:]),interpolation='bicubic',cmap=mpl.colormaps['bone'],extent=[np.min(g0_series),np.max(g0_series),np.min(Vaf_series),np.max(Vaf_series)])
-    plt.show()
-
-ax_num = 2
-for aa in range(veff.shape[ax_num]):
-    plt.imshow(np.flipud(veff[:,:,aa]),interpolation='bicubic',cmap=mpl.colormaps['bone'],extent=[np.min(g0_series),np.max(g0_series),np.min(a1_series),np.max(a1_series)])
-    plt.show()
-
-
-#%%
-
-fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-
-# surf = ax.plot_surface(gg, alpha, Vaf, cmap=cm.viridis,
-                    #    linewidth=0,alpha=1)#, antialiased=False)
-
-ax.view_init(elev=30, azim=250)
-ax.set_box_aspect((2,1,1))
