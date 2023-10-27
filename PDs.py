@@ -1,7 +1,4 @@
-
-#%%
 import os
-
 from copy import deepcopy
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,20 +13,8 @@ parent_folder += '/Projects/EnergyExtraction/codes_results_resub/GitHub_NX_codes
 
 os.chdir(parent_folder)
 
-#%%
-
-# v2even = np.load('v2phi_even.npy')
-# v2odd = np.load('v2phi_odd.npy')
-# v2phi = np.empty((tuple([v2odd.shape[0]+v2even.shape[0]]) + v2odd.shape[1:]))
-
-# v2phi[::2,...] = v2even
-# v2phi[1::2,...] = v2odd
-
 v2phi = np.load('v2phi_all.npy')
-
 Gamma0 = 1
-
-#%%
 
 Vaf_series = np.around(np.linspace(1.5,5.,8),3)
 a1_series = np.around(np.linspace(2,5,13),3)
@@ -40,8 +25,6 @@ g0_series = np.around(np.linspace(.1,.3,9),3)
 
 g_series = g0_series
 
-#%%
-
 for jj in range(v2phi.shape[0]):
     vg = v2phi[jj,:,:]
     lim_g0 = g_series[jj]/Gamma0
@@ -50,7 +33,6 @@ for jj in range(v2phi.shape[0]):
 
 bool_veff = np.ones(v2phi.shape)
 bool_veff[v2phi == 0] = 0
-# bool_veff = np.swapaxes(bool_veff,0,1)
 
 def explode(data):
     size = np.array(data.shape)
@@ -72,25 +54,8 @@ ax.view_init(elev=30, azim=135, roll=0)
 ax.voxels(x, y, z, bool_veff,alpha=1, facecolors=fcolors_2, edgecolors=ecolors_2)#,extent=[0,1,0,1,0,1])
 ax.set_aspect('equal')
 
-# xmin = min(data[0])
-# xmax = max(data[0])
-# ymin = min(data[1])
-# ymax = max(data[1])
-# zmin = min(data[2])
-# zmax = max(data[2])
-# ax.set_xlim3d(xmin, xmax)
-# ax.set_ylim3d(ymin, ymax)
-# ax.set_zlim3d(zmin, zmax)
-
 ax.set_xlabel('$g_0$')
-# ax.set_ylabel('$g_0$')
-# ax.set_zlabel('$g_0$')
-
-# plt.savefig('v2phi_gamma1.png')
-# plt.savefig('v2phi_gamma1.pdf')
 plt.show()
-
-#%%
 
 ax = plt.axes(projection='3d')
 ax.view_init(elev=30, azim=135, roll=0)
@@ -102,12 +67,6 @@ for gg in range(len(g_series)):
         for vv in range(len(Vaf_series)):
             if bool_veff[gg,aa,vv]:
                 ax.scatter(gg, aa, vv, c=255*v2phi[gg,aa,vv]/np.max(v2phi), cmap='viridis', linewidth=0.5,s=50)
-
-# plt.savefig('v2phi_GG1.png')
-# plt.savefig('v2phi_GG1.pdf')
-
-#%%
-
 V0 = v2phi
 
 from numpy import array
