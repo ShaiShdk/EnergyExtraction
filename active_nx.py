@@ -7,9 +7,7 @@
     This code simulates a 1D chain of active viscoelastic substance,
     which pulls on a particle agains the drag force.     
 """
-
-parent_folder  = '/Users/shaish/Library/CloudStorage/Dropbox/Science'
-parent_folder += '/Projects/EnergyExtraction/codes_results_resub/GitHub_NX_codes/NX_results'
+parent_folder  = '~/dir_to_files'
 
 from copy import deepcopy
 import os
