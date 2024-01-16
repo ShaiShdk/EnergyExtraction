@@ -1,4 +1,4 @@
-# EnergyExtraction
+# Energy Extraction
 This repo contains codes for the "Active Energy Extraction" paper.
 
 In af_trans_*.py an activation front moves and provide new active matter which results in sustained transport of the particle. 
