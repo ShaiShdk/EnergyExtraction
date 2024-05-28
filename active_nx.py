@@ -2,7 +2,7 @@
 ########### Active Viscoelastic String w/ Overdamped Particle ###########
 """
     Created on Oct 2023
-    @author: Shai
+    @author: Shahriar Shadkhoo -- Caltech
     -------------------
     This code simulates a 1D chain of active viscoelastic substance,
     which pulls on a particle agains the drag force.     
