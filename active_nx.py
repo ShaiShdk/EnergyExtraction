@@ -8,8 +8,7 @@
     which pulls on a particle agains the drag force.     
 """
 
-parent_folder  = '/Users/shaish/Library/CloudStorage/Dropbox/Science'
-parent_folder += '/Projects/EnergyExtraction/codes_results_resub/GitHub_NX_codes/NX_results'
+parent_folder  = 'parent_directory'
 
 from copy import deepcopy
 import os
@@ -35,13 +34,6 @@ pltshow = True
 GG = 0
 KK = None
 
-# local_folder = f'/KK{KK}_GG{GG}_highRes'
-# os.chdir(parent_folder + local_folder)
-
-# v2phi_name = f'v2phi_KK{KK}_GG{GG}'
-# v_bnd_name = f'v_bnd_KK{KK}_GG{GG}'
-# phi_bnd_name = f'phi_bnd_KK{KK}_GG{GG}'
-
 local_folder = f'/GG{GG}'
 os.chdir(parent_folder + local_folder)
 
@@ -49,10 +41,10 @@ v2phi_name = f'v2phi_GG{GG}'
 v_bnd_name = f'v_bnd_GG{GG}'
 phi_bnd_name = f'phi_GG{GG}'
 
-KK_series  = np.around(np.linspace(.5,2,7),3)   #[.5,1,1.5,2]#np.around(np.linspace(1.,10,37),3)#[KK]
-g0_series  = [None]         #np.around(np.linspace(.1,.3,9),3)
-a1_series  = np.around(np.linspace(2,10,9),3)   #[10]#np.around(np.linspace(1.5,10,35),3)#[3]#[2,3,4,5,6,7,8]#
-Vaf_series = np.around(np.linspace(.5,10.,20),3)   #[10]#np.around(np.linspace(1.,10,37),3)#[2]#,.3,.5,1,2,3,5,10]#
+KK_series  = np.around(np.linspace(.5,2,7),3)  
+g0_series  = [None]      
+a1_series  = np.around(np.linspace(2,10,9),3)  
+Vaf_series = np.around(np.linspace(.5,10.,20),3) 
 
 np.save('KK_series',KK_series)
 np.save('g0_series',g0_series)
@@ -146,21 +138,10 @@ for KK in KK_series:
                 v_field = np.zeros((Nx,1))
                 Xfield  = xs + u_field
 
-                # X_field = np.zeros((Nt,Nx))
-
                 phi_bnd = np.zeros((Nt,1))
                 v_bnd   = np.zeros((Nt,1))
 
                 Xaf     = np.min(Xfield)
-
-                # X_xt = np.zeros((len(tplot),Nx))
-                # V_xt = np.zeros((len(tplot),Nx))
-                # U_xt = np.zeros((len(tplot),Nx))
-                # P_xt = np.zeros((len(tplot),Nx-1))
-                # E_xt = np.zeros((len(tplot),Nx-1))
-                
-                # X_xt[0,:] = xs.reshape(Nx,)
-                # P_xt[0,:] = phi_i * np.ones((1,Nx-1))
 
                 F_particle = 0
                 plt_cnt = -1
@@ -194,7 +175,6 @@ for KK in KK_series:
                     v_field += axel.reshape((Nx,1)) * dt
 
                     Xfield = xs + u_field
-                    # X_field[tt,:] = (xs + u_field).reshape(Nx,)
 
                     v_bnd[tt,0] = v_field[0][0]
                     phi_bnd[tt,0] = phi[0][0]
@@ -203,18 +183,6 @@ for KK in KK_series:
 
                     if tt in tplot:
                         plt_cnt += 1
-                        
-                        # X_xt[plt_cnt,:] = Xfield.reshape(Nx,)
-                        # U_xt[plt_cnt,:] = u_field.reshape(Nx,)
-                        # V_xt[plt_cnt,:] = v_field.reshape(Nx,)
-                        # P_xt[plt_cnt,:] = phi.reshape(Nx-1,)
-                        # E_xt[plt_cnt,:] = eps.reshape(Nx-1,)
-
-                        # X_xt[plt_cnt,inactive_eds] = None
-                        # U_xt[plt_cnt,inactive_eds] = None
-                        # V_xt[plt_cnt,inactive_eds] = None
-                        # P_xt[plt_cnt,inactive_eds] = None
-                        # E_xt[plt_cnt,inactive_eds] = None
                         
                         Xact = Xfield[Xfield<Xaf]
                         Xact_avg = (Xact[:-1] + Xact[1:])/2
@@ -258,7 +226,6 @@ for KK in KK_series:
                 if pltshow:
                     fig = plt.figure(figsize=(10,5),dpi=100,\
                                     facecolor='w',edgecolor='w',linewidth=5)
-                    # plt.plot(tseries,v_bnd/phi_bnd,linewidth=5,solid_capstyle='round')
                     plt.plot(tseries,v_bnd/Vaf,linewidth=5,solid_capstyle='round')
                     plt.xlabel(r'Time',fontsize=30)
                     plt.ylabel(r'$v_b/\phi_b$',fontsize=30,fontname='Times',\
@@ -329,58 +296,8 @@ for KK in KK_series:
 
 t_finish = time()
 
-# import beepy
-# beepy.beep(sound='ping')
-
-# vb = deepcopy(v_bnd_infty[0,0,0,:])
-# # plt.plot(Vaf_series,vb)
-
-#%%
-
-# fig = plt.figure(figsize=(10,5),dpi=100,facecolor='w',edgecolor='w')
-# # plt.title(r'$\phi(x,t)$ vs. $X(x,t)$',fontsize = 20)
-# for tt in range(len(tplot)):
-#     plt.plot(X_xt[:,:-1].T,P_xt.T,linewidth = 3)
-# plt.ylabel(r'$\phi(x,t)$',fontsize = 20)
-# plt.xlabel(r'$X(x,t)$',fontsize = 20)
-# plt.show()
-# plt.savefig('Phi_vs_X.pdf')
-
-# fig = plt.figure(figsize=(10,5),dpi=100,facecolor='w',edgecolor='w')
-# # plt.title(r'$\phi(x,t)$ vs. $X(x,t)$',fontsize = 20)
-# for tt in range(len(tplot)):
-#     plt.plot(X_xt[:,:-1].T,E_xt.T,linewidth = 3)
-# plt.ylabel(r'$\varepsilon(x,t)$',fontsize = 20)
-# plt.xlabel(r'$X(x,t)$',fontsize = 20)
-# plt.show()
-# plt.savefig('E_vs_X.pdf')
-
-# fig = plt.figure(figsize=(10,5),dpi=100,facecolor='w',edgecolor='w')
-# # plt.title(r'$u(x,t)$ vs. $X(x,t)$',fontsize = 20)
-# for tt in range(len(tplot)):
-#     plt.plot(X_xt.T,U_xt.T,linewidth = 3)
-# plt.ylabel(r'$u(x,t)$',fontsize = 20)
-# plt.xlabel(r'$X(x,t)$',fontsize = 20)
-# plt.show()
-# plt.savefig('U_vs_X.pdf')
-
-# fig = plt.figure(figsize=(10,5),dpi=100,facecolor='w',edgecolor='w')
-# # plt.title(r'$v(x,t)$ vs. $X(x,t)$',fontsize = 20)
-# for tt in range(len(tplot)):
-#     plt.plot(X_xt.T,V_xt.T,linewidth = 3)
-# plt.ylabel(r'$v(x,t)$',fontsize = 20)
-# plt.xlabel(r'$X(x,t)$',fontsize = 20)
-# plt.show()
-# plt.savefig('V_vs_X.pdf')
-
-
-#%%
-
 vb = deepcopy(v_bnd_infty[0,0,:,0]/Vaf)
 plt.plot(a1_series,vb)
-
-
-#%%
 
 v2phi_kk = deepcopy(v2phi_ratio[0,...])
 
@@ -408,8 +325,6 @@ pbnd_name   = f'phi_bnd_KK{KK}_GG{GG}.npy'
 
 Vaf_series = np.around(np.linspace(1.,10,37),3)
 a1_series = np.around(np.linspace(1.5,10,35),3)
-# Vaf_series = np.load('Vaf_series.npy')
-# a1_series = np.load('a1_series.npy')
 
 vbnd = np.load(vbnd_name)
 pbnd = np.load(pbnd_name)
@@ -420,15 +335,8 @@ Vmap = np.flipud(Vmap)
 vxp = vbnd[0,0,...] * pbnd[0,0,...]
 vxp = np.flipud(vxp)
 
-# vInf = deepcopy(v_bnd_infty[0,0,...])
-# vInf = np.flipud(vInf)
-
-# v2p = np.load(v2phi_name)
-
 gauss_sigma = 2
 Vmap = gaussian_filter(Vmap, gauss_sigma)
-
-# Vmap = scipy.ndimage.zoom(Vmap, 10)
 
 plt.imshow(Vmap,interpolation='bicubic',cmap=mpl.colormaps['YlGnBu']\
            ,extent=[np.min(a1_series),np.max(a1_series),np.min(Vaf_series),np.max(Vaf_series)])
@@ -447,13 +355,6 @@ saveimg = False
 Gamma0 = 1
 g0_series = np.around(np.linspace(0,.25,51),3)
 
-# Vmap = deepcopy(v_bnd_infty[0,0,...]/phi_bnd_infty[0,0,...])
-# # Vmap = np.fliplr(Vmap)
-# Vmap = np.flipud(Vmap)
-
-# gauss_sigma = 2
-# Vmap = gaussian_filter(Vmap, gauss_sigma)
-
 v2pb = np.zeros((len(g0_series),len(a1_series),len(Vaf_series)))
 vXpb = np.zeros((len(g0_series),len(a1_series),len(Vaf_series)))
 
@@ -462,15 +363,9 @@ for jj in range(len(g0_series)):
 
 for jj in range(len(g0_series)):
     vg1 = v2pb[jj,:,:]
-    # vg2 = vXpb[jj,:,:]
     lim_g0 = g0_series[jj]/Gamma0
     vg1[vg1 > lim_g0] = 0
-    # vg2[vg1 > lim_g0] = 0
     v2pb[jj,:,:] = vg1.astype(bool)
-    # vXpb[jj,:,:] = vg2
-
-# v2pb = np.swapaxes(v2pb,1,2)
-# X,Y,Z = np.meshgrid(g0_series,Vaf_series,a1_series)
 
 X,Y,Z = np.meshgrid(g0_series,a1_series,Vaf_series)
 
@@ -536,14 +431,9 @@ ax.plot([xmax, xmax], [ymax, ymax], [zmin, zmax], **edges_kw)
 ax.plot([xmin, xmax], [ymax, ymax], [zmax, zmax], **edges_kw)
 ax.plot([xmin, xmin], [ymax, ymax], [zmin, zmax], **edges_kw)
 
-# ax.view_init(elev=30, azim=220, roll=0)
 ax.view_init(elev=30, azim=150, roll=0)
-# ax.set_title(f'$\kappa =$ {KK} ; $\gamma =$ {GG}')
 ax.set_box_aspect([2,2,2], zoom=0.9)
-# ax.set_xlabel('$g_0$')
-# ax.set_ylabel('$\alpha_1$')
 
-# fig.colorbar(C, ax=ax, fraction=0.02, pad=0.1, label='$V_{p}$')
 if saveimg:
     plt.savefig(f'v2phi_bnd_KK{KK}_GG{GG}_3Dmanifolds.png')
     plt.savefig(f'v2phi_bnd_KK{KK}_GG{GG}_3Dmanifolds.pdf')
