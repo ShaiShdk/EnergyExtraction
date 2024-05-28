@@ -1,5 +1,5 @@
 # Energy Extraction
-This repo contains codes for a paper published in Physical Review Research : [Theoretical Limits of Energy Extraction in Active Fluids](https://journals.aps.org/prresearch/abstract/10.1103/PhysRevResearch.6.023195);
+This repo contains codes for a paper published in Physical Review Research : [Theoretical Limits of Energy Extraction in Active Fluids](https://journals.aps.org/prresearch/abstract/10.1103/PhysRevResearch.6.023195)
 
 In af_trans_*.py an activation front moves and provide new active matter which results in sustained transport of the particle. 
 
