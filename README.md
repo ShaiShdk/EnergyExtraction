@@ -1,7 +1,7 @@
 # Energy Extraction
 This repo contains codes for a paper published in Physical Review Research : [Theoretical Limits of Energy Extraction in Active Fluids](https://journals.aps.org/prresearch/abstract/10.1103/PhysRevResearch.6.023195)
 
-In af_trans_*.py an activation front moves and provide new active matter which results in sustained transport of the particle. 
+In af_trans_vF.py an activation front moves and provide new active matter which results in sustained transport of the particle. 
 
 In active_string.py the energy conservation and First law of thermodynamics is investigated for an isolated active string which undergoes contraction induced by the active stress.
 
