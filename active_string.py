@@ -2,14 +2,13 @@
 ########### Active Viscoelastic String ###########
 """
     Created on Oct 2023
-    @author: Shai
+    @author: Shahriar Shadkhoo -- Caltech
     -------------------
     This code simulates a 1D chain of active viscoelastic substance,
     with symmetric...     
 """
 
-parent_folder  = '/Users/shaish/Library/CloudStorage/Dropbox/Science'
-parent_folder += '/Projects/EnergyExtraction/codes_resub'
+parent_folder  = 'parent_folder'
 
 import os
 from copy import deepcopy
@@ -46,8 +45,8 @@ KK = 1
 a2 = 1
 a1_series  = [3]
 eta_series = [1]
-########### Particle Parameters ###########
 
+########### Particle Parameters ###########
 xmax = 1
 x_res = 100
 dx = xmax/x_res
@@ -156,9 +155,6 @@ IE_total = KE_total + PE_total
 
 TOT_E = IE_total + QE_total + AE_total + UE_total
 
-# plt.plot(tseries, dx*IE_total, '.' , tseries, dx*QE_total, '.' ,\
-#         tseries, dx*AE_total, '.', tseries, dx*UE_total, '.',\
-#             tseries, dx*TOT_E, '.', markersize= 1)#linewidth=3)
 plt.plot(tseries, dx*IE_total, tseries, dx*QE_total, \
          tseries, dx*AE_total, tseries, dx*UE_total, \
             tseries, dx*TOT_E, linewidth=3)
@@ -167,44 +163,9 @@ plt.legend(['Internal Energy','Dissipated Energy',\
                 bbox_to_anchor=(.95,.35))
 plt.show()
 
-# plt.plot(tseries[1:],KE_total[1:]/AE_total[1:])
-
-#%%
-
-# fig = plt.figure(figsize = (10,7),dpi=100,facecolor='w',edgecolor='w')
-# # for ii in range(len(Vaf_series))
-# # plt.plot(tseries,v_bnd[0,:,-1])
-# plt.plot(eta_series,v_bnd[:,0,-1])
-
-# for ii in range(len(eta_series)):
-#     plt.plot(Veff_table[ii,:])
-
-# fig = plt.figure(figsize=(10,7),dpi=100)
-# plt.plot(tseries,v_bnd[0][0]/Vaf)
-# plt.plot(tseries,1-phi_i/phi_bnd[0][0])
-# plt.show()
-# fig = plt.figure(figsize=(10,7),dpi=100)
-# plt.plot(tseries,v_bnd[0][0]/phi_bnd[0][0])
-# plt.show()
-
-# if savedat:
-#     os.chdir(parent_folder)
-#     np.save('Veff_table' , Veff_table)
-
-# # print((1-phi_i/phi_bnd[0][0][-1])/Veff[-1][0])
-# print((1-phi_i/phi_bnd[0][0][-1]))#/v_bnd[0][0][-1])
-# print(v_bnd[0][0][-1])
-
-# print(v_bnd[0][0][-1]/Vaf/(1-phi_i/phi_bnd[0][0][-1]))
-
-# print(np.around(t_finish - t_start , 2), 'secs')
-
-
 #%%#############################################################################
 
 FE = KE
-
-# FE /= np.ptp(FE)
 
 tmap = (np.linspace(0,Nt-1,Nx)).astype(int)
 Ts = tseries[tmap]
@@ -215,41 +176,5 @@ fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 
 surf = ax.plot_surface(Tf, Xf, FE[tmap], cmap=cm.viridis,
                        linewidth=0,alpha=1)#, antialiased=False)
-
-# surf = ax.plot_surface(Tf[:,:-2], Xf[:,:-2], PE[tmap,:-1], cmap=cm.viridis,
-#                        linewidth=0,alpha=1)#, antialiased=False)
 ax.view_init(elev=30, azim=250)
 ax.set_box_aspect((2,1,1)) #.5*np.ptp(FE[tmap])/np.max(FE)))
-# ax.set_box_aspect((2*np.ptp(Tf)/np.max(Tf), 1*np.ptp(Xf)/np.max(Xf), 1))#.5*np.ptp(FE[tmap])/np.max(FE)))
-
-
-#%%
-
-# IE = KE + PE
-# tmap = (np.linspace(0,Nt-1,Nx)).astype(int)
-
-# plt.imshow(np.flipud(KE[tmap,:]))
-# plt.title('Kinetic')
-# plt.colorbar()
-# plt.show()
-# plt.imshow(np.flipud(PE[tmap,:]))
-# plt.title('Potential')
-# plt.colorbar()
-# plt.show()
-# plt.imshow(np.flipud(IE[tmap,:]))
-# plt.title('Internal')
-# plt.colorbar()
-# plt.show()
-# plt.imshow(np.flipud(dA[tmap,:]))
-# plt.title('Active')
-# plt.colorbar()
-# plt.show()
-# plt.imshow(np.flipud(dU[tmap,:]))
-# plt.title('dU term')
-# plt.colorbar()
-# plt.show()
-# plt.imshow(np.flipud(dQ[tmap,:]))
-# plt.title('Dissipated')
-# plt.colorbar()
-# plt.show()
-
