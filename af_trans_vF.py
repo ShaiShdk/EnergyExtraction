@@ -2,14 +2,13 @@
 ########### Active Viscoelastic String w/ Overdamped Particle ###########
 """
     Created on Oct 2023
-    @author: Shai
+    @author: Shahriar Shadkhoo -- Caltech
     -------------------
     This code simulates a 1D chain of active viscoelastic substance,
     which pulls on a particle agains the drag force.     
 """
 
-parent_folder  = '/Users/shaish/Library/CloudStorage/Dropbox/Science'
-parent_folder += '/Projects/EnergyExtraction/codes_resub/resub_results/macro_range'
+parent_folder  = 'parent_directory'
 
 Veff_name = 'Veff_table_K11_macro_range'
 
@@ -84,12 +83,6 @@ v_bnd = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series),N
 phi_bnd = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series),Nt))
 max_ratio = np.zeros((len(KK_series),len(g0_series),len(a1_series),len(Vaf_series),Nt))
 
-# KE = np.zeros((Nt,Nx))
-# PE = np.zeros((Nt,Nx-1))
-# dA = np.zeros((Nt,Nx))
-# dU = np.zeros((Nt,Nx))
-# dQ = np.zeros((Nt,Nx))
-
 total_cnt = 0
 
 k_ind = 0
@@ -158,11 +151,6 @@ for KK in KK_series:
                 F_particle = 0
                 plt_cnt = -1
 
-                # KE = np.zeros((Nt,Nx))
-                # PE = np.zeros((Nt,Nx-1))
-                # AE = np.zeros((Nt,Nx-1))
-                # PV = np.zeros((Nt,Nx-1))
-
                 for tt in tqdm(range(Nt-1)):
                     Xaf += Vaf * dt
                     if tt in t_update:
@@ -219,19 +207,6 @@ for KK in KK_series:
                     Veff[tt+1] = np.around((Xp[tt+1]-Xp[0])/((tt+1)*dt),3)
 
                     #####################################################################
-     
-                    # KE[tt,:] = .5 * phi_i * (v_field**2).reshape(Nx,)/dx              # Kinetic Energy
-                    # PE[tt,:] = .5 * (KK) * (eps**2).reshape(Nx-1,)/dx               # Potential Energy
-                    # dA[tt,:] = (v_field * inc0.T.dot(sigma1)).reshape(Nx,)/dx**2
-                    # dU[tt,:] = (v_field * inc0.T.dot(sigma2)).reshape(Nx,)/dx**2
-                    # dQ[tt,:] = eta * (v_field * adj.dot(v_field)).reshape(len(v_field),)/dx**3\
-                    #         + GG * (v_field**2).reshape(Nx,)/dx
-                    # KE[tt,inactive_eds] = 0
-                    # PE[tt,inactive_eds] = 0
-                    # AE[tt,inactive_eds] = 0
-                    # PV[tt,inactive_eds] = 0
-
-                    #####################################################################
 
                     if tt in tplot:
                         plt_cnt += 1
@@ -251,26 +226,6 @@ for KK in KK_series:
                                 linewidth=3,alpha=1,solid_capstyle='round',\
                                     color=[151/255,14/255,83/255])
                         plt.scatter(Xp[tt],tt*dt,color=[.3,.3,.3],s=100,zorder=3)
-                
-                # Vp_avg = time_avg(Vp,T_avg)
-
-                # KE_total = np.sum(KE, axis = 1)
-                # PE_total = np.sum(PE, axis = 1)
-                # dA_total = np.sum(dA, axis = 1)
-                # dU_total = np.sum(dU, axis = 1)
-                # dQ_total = np.sum(dQ, axis = 1)
-
-                # AE_total = np.cumsum(dA_total) * dt
-                # UE_total = np.cumsum(dU_total) * dt
-                # QE_total = np.cumsum(dQ_total) * dt
-
-                # IE_total = KE_total + PE_total
-                # TOT_E = IE_total + QE_total + AE_total + UE_total
-
-                # KE[-1,:] = KE[-2,:]
-                # PE[-1,:] = PE[-2,:]
-                # AE[-1,:] = AE[-2,:]
-                # PV[-1,:] = PV[-2,:]
 
                 if pltshow:
                     plt.plot(np.min(xs)+Vaf*tseries[:tt],tseries[:tt],'-',\
@@ -352,8 +307,8 @@ for KK in KK_series:
 
 t_finish = time()
 
-# import beepy
-# beepy.beep(sound='ping')
+import beepy
+beepy.beep(sound='ping')
 
 np.save(Veff_name,Veff_table)
 
@@ -375,8 +330,6 @@ vall2 = deepcopy(vall[0,:,:,:])
 
 #%%
 
-# vall2 = deepcopy(Veff_copy)
-
 vall2 = np.load('V_all.npy')
 
 bool_veff = np.ones(vall2.shape)
@@ -387,7 +340,6 @@ bool_veff = np.swapaxes(bool_veff,0,1)
 def explode(data):
     size = np.array(data.shape)
     data_e = np.zeros(size - 1, dtype=data.dtype)
-    # data_e[::2, ::2, ::2] = data
     data_e = data
     return data_e
 
@@ -398,7 +350,7 @@ edgecolors = np.where(n_voxels, '#BFAB6E', '#FDF4A6')
 fcolors_2 = explode(facecolors)
 ecolors_2 = explode(edgecolors)
 
-x, y, z = np.indices(np.array(bool_veff.shape)+1)#.astype(float) // 2
+x, y, z = np.indices(np.array(bool_veff.shape)+1)
 
 ax = plt.figure().add_subplot(projection='3d')
 ax.voxels(x, y, z, bool_veff,alpha=1, facecolors=fcolors_2, edgecolors=ecolors_2)
@@ -426,22 +378,25 @@ veff = vall2/np.max(vall2)
 veff = np.swapaxes(veff,0,1)
 
 #%%
+
+plt_setting = {'interpolation':'bicubic','cmap':mpl.colormaps['bone']}
+
 veff = vall2
 ax_num = 0
 for aa in range(veff.shape[ax_num]):
-    plt.imshow(np.flipud(veff[aa,:,:]),interpolation='bicubic',cmap=mpl.colormaps['bone'],extent=[np.min(a1_series),np.max(a1_series),np.min(Vaf_series),np.max(Vaf_series)])
+    plt.imshow(np.flipud(veff[aa,:,:]),extent=[np.min(a1_series),np.max(a1_series),np.min(Vaf_series),np.max(Vaf_series)], **plt_setting)
     plt.show()
 
 #%%
 
 ax_num = 1
 for aa in range(veff.shape[ax_num]):
-    plt.imshow(np.flipud(veff[:,aa,:]),interpolation='bicubic',cmap=mpl.colormaps['bone'],extent=[np.min(g0_series),np.max(g0_series),np.min(Vaf_series),np.max(Vaf_series)])
+    plt.imshow(np.flipud(veff[:,aa,:]),extent=[np.min(g0_series),np.max(g0_series),np.min(Vaf_series),np.max(Vaf_series)], **plt_setting)
     plt.show()
 
 #%%
 
 ax_num = 2
 for aa in range(veff.shape[ax_num]):
-    plt.imshow(np.flipud(veff[:,:,aa]),interpolation='bicubic',cmap=mpl.colormaps['bone'],extent=[np.min(g0_series),np.max(g0_series),np.min(a1_series),np.max(a1_series)])
+    plt.imshow(np.flipud(veff[:,:,aa]),extent=[np.min(g0_series),np.max(g0_series),np.min(a1_series),np.max(a1_series)], **plt_setting)
     plt.show()
