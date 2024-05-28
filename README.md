@@ -1,5 +1,5 @@
 # Energy Extraction
-This repo contains codes for the "Active Energy Extraction" paper.
+This repo contains codes for a paper published in Physical Review Research : [https://journals.aps.org/prresearch/abstract/10.1103/PhysRevResearch.6.023195](Theoretical Limits of Energy Extraction in Active Fluids); 
 
 In af_trans_*.py an activation front moves and provide new active matter which results in sustained transport of the particle. 
 
@@ -8,3 +8,6 @@ In active_string.py the energy conservation and First law of thermodynamics is i
 In active_nx.py the particle is removed, i.e. only the dynamics of active region is simulated. That is sufficient so long as the effect of the particle on the field is neglected.
 
 Finally, PDs.py plots all the phase diagrams. 
+
+
+
